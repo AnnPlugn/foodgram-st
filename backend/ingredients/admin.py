@@ -1,6 +1,7 @@
 from django.contrib import admin
 from .models import IngredientModel
 
+
 @admin.register(IngredientModel)
 class IngredientAdmin(admin.ModelAdmin):
     list_display = (

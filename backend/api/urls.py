@@ -1,6 +1,10 @@
 from django.urls import include, path
 from rest_framework.routers import DefaultRouter
-from api.views import ComponentViewSet, DishViewSet, ProfileViewSet, ShortLinkRedirectView
+from api.views import (ComponentViewSet,
+    DishViewSet,
+    ProfileViewSet,
+    ShortLinkRedirectView,
+)
 
 app_name = "api"
 

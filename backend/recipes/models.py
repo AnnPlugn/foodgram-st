@@ -8,6 +8,7 @@ from django.contrib.auth import get_user_model
 
 User = get_user_model()
 
+
 class Dish(models.Model):
     name = models.CharField(
         verbose_name="Название вашего шедевра",
@@ -45,9 +46,7 @@ class Dish(models.Model):
         to=User,
         on_delete=models.CASCADE,
     )
-    created_at = models.DateTimeField(
-        verbose_name="Добавлено", auto_now_add=True
-    )
+    created_at = models.DateTimeField(verbose_name="Добавлено", auto_now_add=True)
 
     class Meta:
         default_related_name = "recipes"
@@ -58,10 +57,9 @@ class Dish(models.Model):
     def __str__(self):
         return self.name
 
+
 class ComponentRecipe(models.Model):
-    recipe = models.ForeignKey(
-        verbose_name="Рецепт", to=Dish, on_delete=models.CASCADE
-    )
+    recipe = models.ForeignKey(verbose_name="Рецепт", to=Dish, on_delete=models.CASCADE)
     ingredient = models.ForeignKey(
         verbose_name="Ингредиент", to=IngredientModel, on_delete=models.CASCADE
     )
@@ -87,10 +85,9 @@ class ComponentRecipe(models.Model):
     def __str__(self):
         return f"{self.ingredient}"
 
+
 class FavoriteDish(models.Model):
-    recipe = models.ForeignKey(
-        verbose_name="Рецепт", to=Dish, on_delete=models.CASCADE
-    )
+    recipe = models.ForeignKey(verbose_name="Рецепт", to=Dish, on_delete=models.CASCADE)
     user = models.ForeignKey(
         verbose_name="Пользователь",
         to=User,
@@ -105,10 +102,9 @@ class FavoriteDish(models.Model):
     def __str__(self):
         return str(self.recipe)
 
+
 class ShoppingCart(models.Model):
-    recipe = models.ForeignKey(
-        verbose_name="Рецепт", to=Dish, on_delete=models.CASCADE
-    )
+    recipe = models.ForeignKey(verbose_name="Рецепт", to=Dish, on_delete=models.CASCADE)
     user = models.ForeignKey(
         verbose_name="Кулинар",
         to=User,
@@ -123,11 +119,10 @@ class ShoppingCart(models.Model):
     def __str__(self):
         return str(self.recipe)
 
+
 class ShortUrl(models.Model):
     origin_url = models.URLField(
-        verbose_name="Исходная ссылка",
-        primary_key=True,
-        max_length=200
+        verbose_name="Исходная ссылка", primary_key=True, max_length=200
     )
     short_url = models.SlugField(
         verbose_name="Короткая ссылка",
@@ -164,4 +159,6 @@ class ShortUrl(models.Model):
             if not cls.objects.filter(short_url=short_url).exists():
                 return short_url
             attempt += 1
-        raise ValueError(f"Не удалось сгенерировать пользовательский токен после {max_attempts} попыток")
+        raise ValueError(
+            f"Не удалось сгенерировать пользовательский токен после {max_attempts} попыток"
+        )

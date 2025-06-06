@@ -28,7 +28,7 @@ collect_static_files() {
 }
 
 load_fixtures() {
-    local fixture_file="dump/db.json"
+    local fixture_file="dump/init.json"
     echo "Loading fixtures from $fixture_file..."
 
     if [ -f "$fixture_file" ]; then
@@ -45,10 +45,9 @@ load_fixtures() {
 
 main() {
     perform_migrations
-
     collect_static_files
+    load_fixtures
 
-    python manage.py loaddata dump/init.json
     echo "Starting Gunicorn server..."
     exec gunicorn --bind 0.0.0.0:8000 --timeout 90 foodgram.wsgi
 }

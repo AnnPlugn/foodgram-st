@@ -51,7 +51,9 @@ class ComponentSerializer(serializers.ModelSerializer):
 class RecipeComponentSerializer(serializers.ModelSerializer):
     id = serializers.IntegerField(source="ingredient.id")
     name = serializers.CharField(source="ingredient.name", read_only=True)
-    measurement_unit = serializers.CharField(source="ingredient.measurement_unit", read_only=True)
+    measurement_unit = serializers.CharField(
+        source="ingredient.measurement_unit", read_only=True
+    )
     amount = serializers.IntegerField(min_value=1)
 
     class Meta:
@@ -69,8 +71,15 @@ class DishSerializer(serializers.ModelSerializer):
     class Meta:
         model = Dish
         fields = (
-            "id", "author", "ingredients", "is_favorited", "is_in_shopping_cart",
-            "name", "image", "text", "cooking_time",
+            "id",
+            "author",
+            "ingredients",
+            "is_favorited",
+            "is_in_shopping_cart",
+            "name",
+            "image",
+            "text",
+            "cooking_time",
         )
         read_only_fields = ("is_favorited", "is_in_shopping_cart")
 
@@ -94,7 +103,9 @@ class DishSerializer(serializers.ModelSerializer):
         existing_ids = set(IngredientModel.objects.values_list("id", flat=True))
         missing_ids = set(ingredient_ids) - existing_ids
         if missing_ids:
-            raise serializers.ValidationError(f"Ingredients with IDs {', '.join(map(str, missing_ids))} not found.")
+            raise serializers.ValidationError(
+                f"Ingredients with IDs {', '.join(map(str, missing_ids))} not found."
+            )
         return ingredients
 
     def _check_relation(self, dish, relation_type):
@@ -110,18 +121,23 @@ class DishSerializer(serializers.ModelSerializer):
         return self._check_relation(dish, "shopping_cart")
 
     def _store_ingredients(self, dish, ingredient_data):
-        ComponentRecipe.objects.bulk_create([
-            ComponentRecipe(
-                recipe=dish,
-                ingredient_id=item["ingredient"]["id"],
-                amount=item["amount"],
-            ) for item in ingredient_data
-        ])
+        ComponentRecipe.objects.bulk_create(
+            [
+                ComponentRecipe(
+                    recipe=dish,
+                    ingredient_id=item["ingredient"]["id"],
+                    amount=item["amount"],
+                )
+                for item in ingredient_data
+            ]
+        )
 
     @transaction.atomic
     def create(self, validated_data):
         ingredient_data = validated_data.pop("ingredient_recipes", None)
-        dish = Dish.objects.create(author=self.context["request"].user, **validated_data)
+        dish = Dish.objects.create(
+            author=self.context["request"].user, **validated_data
+        )
         self._store_ingredients(dish, ingredient_data)
         return dish
 
@@ -162,13 +178,17 @@ class BaseCartFavoriteSerializer(serializers.ModelSerializer):
 class CartSerializer(BaseCartFavoriteSerializer):
     class Meta(BaseCartFavoriteSerializer.Meta):
         model = ShoppingCart
-        validators = BaseCartFavoriteSerializer.create_validator(ShoppingCart, "Recipe already in cart")
+        validators = BaseCartFavoriteSerializer.create_validator(
+            ShoppingCart, "Recipe already in cart"
+        )
 
 
 class FavoriteDishSerializer(BaseCartFavoriteSerializer):
     class Meta(BaseCartFavoriteSerializer.Meta):
         model = FavoriteDish
-        validators = BaseCartFavoriteSerializer.create_validator(FavoriteDish, "Recipe already favorited")
+        validators = BaseCartFavoriteSerializer.create_validator(
+            FavoriteDish, "Recipe already favorited"
+        )
 
 
 class FollowSerializer(EnhancedUserSerializer):
@@ -177,8 +197,15 @@ class FollowSerializer(EnhancedUserSerializer):
 
     class Meta(EnhancedUserSerializer.Meta):
         fields = (
-            "email", "id", "username", "first_name", "last_name",
-            "is_subscribed", "recipes", "recipes_count", "avatar"
+            "email",
+            "id",
+            "username",
+            "first_name",
+            "last_name",
+            "is_subscribed",
+            "recipes",
+            "recipes_count",
+            "avatar",
         )
 
     def get_recipes(self, obj):
@@ -186,7 +213,9 @@ class FollowSerializer(EnhancedUserSerializer):
         request = self.context.get("request")
         limit = int(request.query_params.get("recipes_limit", len(recipes)))
         recipes = recipes[:limit]
-        return CompactDishSerializer(recipes, many=True, context={"request": request}).data
+        return CompactDishSerializer(
+            recipes, many=True, context={"request": request}
+        ).data
 
     def get_recipes_count(self, obj):
         return obj.recipes.all().count()

@@ -10,6 +10,7 @@ from foodgram.const import (
     max_len_name,
 )
 
+
 class BlogerUser(AbstractUser):
     username_validator = UnicodeUsernameValidator()
     email = models.EmailField(
@@ -50,6 +51,7 @@ class BlogerUser(AbstractUser):
     def __str__(self):
         return self.username
 
+
 class SubscriptionPlan(models.Model):
     user = models.ForeignKey(
         verbose_name="Пользователь",
@@ -66,9 +68,7 @@ class SubscriptionPlan(models.Model):
 
     class Meta:
         constraints = (
-            models.UniqueConstraint(
-                fields=("user", "author"), name="unique_following"
-            ),
+            models.UniqueConstraint(fields=("user", "author"), name="unique_following"),
         )
         verbose_name = "Подписка"
         verbose_name_plural = "Подписки"

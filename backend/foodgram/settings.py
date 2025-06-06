@@ -12,7 +12,7 @@ CONFIG = {
         "KEY": system_os.getenv("DJANGO_SECRET_KEY", generate_secret()),
         "DEBUG": system_os.getenv("DJANGO_DEBUG", "false").lower() == "true",
         "HOSTS": system_os.getenv("ALLOWED_HOSTS", "").split(","),
-        "CORS": system_os.getenv("CORS_ALLOWED_HOSTS", "").split(",")
+        "CORS": system_os.getenv("CORS_ALLOWED_HOSTS", "").split(","),
     },
     "APPS": [
         "django.contrib.admin",
@@ -50,42 +50,45 @@ CONFIG = {
             "PORT": system_os.getenv("DB_PORT", 5432),
         }
     },
-    "TEMPLATES": [{
-        "BACKEND": "django.template.backends.django.DjangoTemplates",
-        "DIRS": [],
-        "APP_DIRS": True,
-        "OPTIONS": {
-            "context_processors": [
-                "django.template.context_processors.debug",
-                "django.template.context_processors.request",
-                "django.contrib.auth.context_processors.auth",
-                "django.contrib.messages.context_processors.messages",
-            ],
-        },
-    }],
+    "TEMPLATES": [
+        {
+            "BACKEND": "django.template.backends.django.DjangoTemplates",
+            "DIRS": [],
+            "APP_DIRS": True,
+            "OPTIONS": {
+                "context_processors": [
+                    "django.template.context_processors.debug",
+                    "django.template.context_processors.request",
+                    "django.contrib.auth.context_processors.auth",
+                    "django.contrib.messages.context_processors.messages",
+                ],
+            },
+        }
+    ],
     "AUTH": {
         "VALIDATORS": [
-            {"NAME": "django.contrib.auth.password_validation.UserAttributeSimilarityValidator"},
+            {
+                "NAME": "django.contrib.auth.password_validation.UserAttributeSimilarityValidator"
+            },
             {"NAME": "django.contrib.auth.password_validation.MinimumLengthValidator"},
             {"NAME": "django.contrib.auth.password_validation.CommonPasswordValidator"},
-            {"NAME": "django.contrib.auth.password_validation.NumericPasswordValidator"},
+            {
+                "NAME": "django.contrib.auth.password_validation.NumericPasswordValidator"
+            },
         ],
-        "USER_MODEL": "users.BlogerUser"
+        "USER_MODEL": "users.BlogerUser",
     },
     "LOCALIZATION": {
         "LANGUAGE": "ru-RU",
         "TIMEZONE": "Europe/Moscow",
         "USE_I18N": True,
-        "USE_TZ": True
+        "USE_TZ": True,
     },
     "STATIC": {
         "URL": "/static_backend/",
-        "ROOT": system_os.path.join(ROOT_PATH, "static_backend")
+        "ROOT": system_os.path.join(ROOT_PATH, "static_backend"),
     },
-    "MEDIA": {
-        "URL": "/media_backend/",
-        "ROOT": ROOT_PATH / "media_backend"
-    },
+    "MEDIA": {"URL": "/media_backend/", "ROOT": ROOT_PATH / "media_backend"},
     "DJOSER_CONFIG": {
         "LOGIN_FIELD": "email",
         "HIDE_USERS": False,
@@ -107,19 +110,14 @@ CONFIG = {
             "user_delete": ["djoser.permissions.CurrentUserOrAdmin"],
             "user": ["rest_framework.permissions.IsAuthenticatedOrReadOnly"],
             "user_list": ["rest_framework.permissions.AllowAny"],
-        }
+        },
     },
-    "FILE_UPLOADS": {
-        "AVATAR": "users/images/",
-        "RECIPES": "recipes/images/"
-    },
+    "FILE_UPLOADS": {"AVATAR": "users/images/", "RECIPES": "recipes/images/"},
     "URL_SHORTENER": {
         "CHARS": "ABCDEFGHJKLMNOPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz1234567890",
-        "TOKEN_LEN": 6
+        "TOKEN_LEN": 6,
     },
-    "SHOPPING_LIST": {
-        "FILE_NAME": "shopping_list"
-    }
+    "SHOPPING_LIST": {"FILE_NAME": "shopping_list"},
 }
 
 REST_API_SETTINGS = {
@@ -156,9 +154,13 @@ DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 MEDIA_URL = CONFIG["MEDIA"]["URL"]
 MEDIA_ROOT = CONFIG["MEDIA"]["ROOT"]
 REST_FRAMEWORK = {
-    key: value for key, value in [
+    key: value
+    for key, value in [
         ("DEFAULT_PERMISSION_CLASSES", REST_API_SETTINGS["DEFAULT_PERMISSION_CLASSES"]),
-        ("DEFAULT_AUTHENTICATION_CLASSES", REST_API_SETTINGS["DEFAULT_AUTHENTICATION_CLASSES"]),
+        (
+            "DEFAULT_AUTHENTICATION_CLASSES",
+            REST_API_SETTINGS["DEFAULT_AUTHENTICATION_CLASSES"],
+        ),
         ("DEFAULT_PAGINATION_CLASS", REST_API_SETTINGS["PAGINATION"]["CLASS"]),
         ("PAGE_SIZE", REST_API_SETTINGS["PAGINATION"]["ITEMS_PER_PAGE"]),
     ]

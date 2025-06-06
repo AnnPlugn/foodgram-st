@@ -1,10 +1,9 @@
 from django.db import models
 from foodgram.const import max_len_ingredient
 
+
 class IngredientModel(models.Model):
-    name = models.CharField(
-        "Название", max_length=max_len_ingredient, db_index=True
-    )
+    name = models.CharField("Название", max_length=max_len_ingredient, db_index=True)
     measurement_unit = models.CharField("Ед измерения", max_length=64)
 
     class Meta:

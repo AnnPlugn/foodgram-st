@@ -1,9 +1,11 @@
 from django.contrib import admin
 from .models import FavoriteDish, ComponentRecipe, Dish, ShoppingCart, ShortUrl
 
+
 class ComponentRecipeInline(admin.StackedInline):
     model = ComponentRecipe
     extra = 0
+
 
 @admin.register(ComponentRecipe)
 class ComponentRecipeAdmin(admin.ModelAdmin):
@@ -14,6 +16,7 @@ class ComponentRecipeAdmin(admin.ModelAdmin):
     )
     search_fields = ("recipe__name", "ingredient__name")
     list_filter = ("amount",)
+
 
 @admin.register(Dish)
 class RecipeAdmin(admin.ModelAdmin):
@@ -31,6 +34,7 @@ class RecipeAdmin(admin.ModelAdmin):
     def favorites_count(self, obj):
         return obj.favorites.count()
 
+
 @admin.register(FavoriteDish)
 class FavoriteRecipeAdmin(admin.ModelAdmin):
     list_display = (
@@ -39,11 +43,13 @@ class FavoriteRecipeAdmin(admin.ModelAdmin):
     )
     search_fields = ("recipe__name", "user__username")
 
+
 @admin.register(ShortUrl)
 class ShortUrlAdmin(admin.ModelAdmin):
     list_display = ("origin_url", "short_url")
     search_fields = ("origin_url", "short_url")
     list_per_page = 20
+
 
 @admin.register(ShoppingCart)
 class ShoppingCartAdmin(admin.ModelAdmin):

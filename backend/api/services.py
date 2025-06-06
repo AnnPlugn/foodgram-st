@@ -17,11 +17,7 @@ class CartProcessor:
     @staticmethod
     def handle_dishes(request):
         dishes = CartProcessor.fetch_user_cart(request.user)
-        serializer = DishDataSerializer(
-            dishes,
-            many=True,
-            context={"request": request}
-        )
+        serializer = DishDataSerializer(dishes, many=True, context={"request": request})
         return serializer.data
 
 
@@ -60,7 +56,9 @@ class DocumentGenerator:
     def _handle_dish(self, dish_data, ingredient_list):
         self._add_heading(f"Recipe: {dish_data['name']}", 14, "B")
         creator = dish_data["author"]
-        self._add_line(f"Author: {creator['first_name']} {creator['last_name']} ({creator['username']})")
+        self._add_line(
+            f"Author: {creator['first_name']} {creator['last_name']} ({creator['username']})"
+        )
         self._add_line(f"Cooking time: {dish_data['cooking_time']} min")
         self.pdf.multi_cell(0, 8, f"Description: {dish_data['text']}")
         self.pdf.ln(5)
@@ -110,7 +108,7 @@ class DishManager:
         fetch_obj(DishModel, pk=dish_id)
         serializer = serializer_class(
             data={"recipe": dish_id, "user": request.user.id},
-            context={"request": request}
+            context={"request": request},
         )
         serializer.is_valid(raise_exception=True)
         serializer.save()
