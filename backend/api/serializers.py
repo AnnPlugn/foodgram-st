@@ -149,6 +149,11 @@ class DishSerializer(serializers.ModelSerializer):
         self._store_ingredients(instance, ingredient_data)
         return instance
 
+class IngredientSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = IngredientModel
+        fields = ("id", "name", "measurement_unit")
+
 
 class CompactDishSerializer(serializers.ModelSerializer):
     class Meta:

@@ -1,12 +1,13 @@
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import viewsets
-from rest_framework.permissions import AllowAny, IsAuthenticated
+from rest_framework.permissions import AllowAny, IsAuthenticated, IsAuthenticatedOrReadOnly
 from rest_framework.decorators import action
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework import status
 from django.shortcuts import get_object_or_404, redirect
 from django.http import FileResponse
+from rest_framework import viewsets, permissions
 from djoser.views import UserViewSet
 from ingredients.models import IngredientModel
 from recipes.models import Dish, FavoriteDish, ShoppingCart, ShortUrl
@@ -22,6 +23,7 @@ from api.serializers import (
     SubscriptionHandlerSerializer,
     FollowSerializer,
     ProfileImageSerializer,
+    IngredientSerializer,
 )
 from api.services import DishManager
 from django.conf import settings
@@ -32,12 +34,15 @@ User = get_user_model()
 
 class ComponentViewSet(viewsets.ReadOnlyModelViewSet):
     queryset = IngredientModel.objects.all()
-    serializer_class = ComponentSerializer
-    filter_backends = (DjangoFilterBackend,)
-    filterset_class = ComponentFilter
-    permission_classes = (AllowAny,)
+    serializer_class = IngredientSerializer
+    permission_classes = [permissions.AllowAny]
     pagination_class = None
 
+    def get_queryset(self):
+        name = self.request.query_params.get("name")
+        if name:
+            return self.queryset.filter(name__startswith=name)
+        return self.queryset
 
 class DishViewSet(viewsets.ModelViewSet):
     queryset = Dish.objects.all()
@@ -96,6 +101,25 @@ class DishViewSet(viewsets.ModelViewSet):
 
 
 class ProfileViewSet(UserViewSet):
+    queryset = User.objects.all()
+    permission_classes = [permissions.AllowAny]
+
+    @action(
+        detail=False,
+        methods=["GET", "PUT"],
+        permission_classes=[permissions.IsAuthenticated],
+    )
+    def me(self, request):
+        serializer = EnhancedUserSerializer(
+            request.user,
+            data=request.data,
+            partial=True,
+            context={"request": request},
+        )
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+        return Response(serializer.data)
+
     @action(
         methods=("PUT",),
         detail=False,
@@ -121,7 +145,7 @@ class ProfileViewSet(UserViewSet):
     @action(
         methods=("GET",),
         detail=False,
-        permission_classes=(IsAuthenticated,),
+        permission_classes=(IsAuthenticatedOrReadOnly,),
         url_path="subscriptions",
     )
     def get_follows(self, request):

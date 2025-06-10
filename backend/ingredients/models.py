@@ -18,4 +18,4 @@ class IngredientModel(models.Model):
         ]
 
     def __str__(self):
-        return f"{self.name}"
+        return f"{self.name} ({self.measurement_unit})"
