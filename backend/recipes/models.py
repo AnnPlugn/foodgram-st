@@ -1,10 +1,17 @@
 from django.conf import settings
 from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models
-import random
-from foodgram.const import max_len_recipe, max_len_url
+from foodgram.const import (
+    max_len_recipe,
+    max_len_url,
+    MIN_COOKING_TIME,
+    MAX_COOKING_TIME,
+    MIN_INGREDIENT_AMOUNT,
+    MAX_INGREDIENT_AMOUNT,
+)
 from ingredients.models import IngredientModel
 from django.contrib.auth import get_user_model
+from .utils import generate_short_token
 
 User = get_user_model()
 
@@ -20,14 +27,12 @@ class Dish(models.Model):
         verbose_name="Время готовки (мин)",
         validators=[
             MinValueValidator(
-                limit_value=1, message="Вы не флеш готовка не может быть меньше 1 мин!"
+                limit_value=MIN_COOKING_TIME,
+                message="Вы не флеш, готовка не может быть меньше 1 мин!",
             ),
             MaxValueValidator(
-                limit_value=14400,
-                message=(
-                    "Макс значение",
-                    "вы не улитка готовьте меньше 10 дней (14 400 минут)!",
-                ),
+                limit_value=MAX_COOKING_TIME,
+                message="Вы не улитка, готовьте меньше 32 000 минут!",
             ),
         ],
         help_text="Введите число большее или равное 1",
@@ -57,6 +62,9 @@ class Dish(models.Model):
     def __str__(self):
         return self.name
 
+    def __str__(self):
+        return self.name
+
 
 class ComponentRecipe(models.Model):
     recipe = models.ForeignKey(verbose_name="Рецепт", to=Dish, on_delete=models.CASCADE)
@@ -67,12 +75,12 @@ class ComponentRecipe(models.Model):
         verbose_name="Кол-во",
         validators=[
             MinValueValidator(
-                limit_value=1,
+                limit_value=MIN_INGREDIENT_AMOUNT,
                 message="Количество ингредиентов не может быть меньше 1!",
             ),
             MaxValueValidator(
-                limit_value=10000,
-                message="Количество ингредиентов не может быть больше 10000!",
+                limit_value=MAX_INGREDIENT_AMOUNT,
+                message="Количество ингредиентов не может быть больше 32 000!",
             ),
         ],
     )
@@ -141,24 +149,7 @@ class ShortUrl(models.Model):
 
     def save(self, *args, **kwargs):
         if not self.short_url:
-            self.short_url = self.generate_short_token()
+            self.short_url = generate_short_token(
+                self.__class__
+            )  # Pass the ShortUrl class
         super().save(*args, **kwargs)
-
-    @classmethod
-    def generate_short_token(cls):
-        max_attempts = 100
-        attempt = 0
-        while attempt < max_attempts:
-            token = "".join(
-                random.choices(
-                    settings.CHARACTERS_SHORT_URL,
-                    k=settings.TOKEN_LENGTH_SHORT_URL,
-                )
-            )
-            short_url = f"/s/{token}/"
-            if not cls.objects.filter(short_url=short_url).exists():
-                return short_url
-            attempt += 1
-        raise ValueError(
-            f"Не удалось сгенерировать пользовательский токен после {max_attempts} попыток"
-        )

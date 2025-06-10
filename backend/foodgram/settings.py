@@ -18,7 +18,7 @@ from dotenv import load_dotenv
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 # Load environment variables from .env file
-load_dotenv(os.path.join(BASE_DIR, '.env'))  # .env в корне проекта
+load_dotenv(os.path.join(BASE_DIR, ".env"))  # .env в корне проекта
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/5.2/howto/deployment/checklist/
@@ -31,7 +31,9 @@ if not SECRET_KEY:
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = os.getenv("DJANGO_DEBUG", "False").lower() == "true"
 
-ALLOWED_HOSTS = [host for host in os.getenv("ALLOWED_HOSTS", "localhost").split(",") if host]
+ALLOWED_HOSTS = [
+    host for host in os.getenv("ALLOWED_HOSTS", "localhost").split(",") if host
+]
 
 # Application definition
 INSTALLED_APPS = [
@@ -48,7 +50,7 @@ INSTALLED_APPS = [
     "django_filters",
     "ingredients.apps.IngredientConfig",
     "users.apps.UsersConfig",
-    "recipes.apps.RecipesConfig"
+    "recipes.apps.RecipesConfig",
 ]
 
 MIDDLEWARE = [
@@ -98,7 +100,9 @@ DATABASES = {
 # Password validation
 # https://docs.djangoproject.com/en/5.2/ref/settings/#auth-password-validators
 AUTH_PASSWORD_VALIDATORS = [
-    {"NAME": "django.contrib.auth.password_validation.UserAttributeSimilarityValidator"},
+    {
+        "NAME": "django.contrib.auth.password_validation.UserAttributeSimilarityValidator"
+    },
     {"NAME": "django.contrib.auth.password_validation.MinimumLengthValidator"},
     {"NAME": "django.contrib.auth.password_validation.CommonPasswordValidator"},
     {"NAME": "django.contrib.auth.password_validation.NumericPasswordValidator"},
@@ -157,7 +161,9 @@ DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
 # Custom settings
 AUTH_USER_MODEL = "users.BlogerUser"
-CORS_ALLOWED_ORIGINS = [host for host in os.getenv("CORS_ALLOWED_HOSTS", "").split(",") if host]
+CORS_ALLOWED_ORIGINS = [
+    host for host in os.getenv("CORS_ALLOWED_HOSTS", "").split(",") if host
+]
 UPLOAD_AVATAR = "users/images/"
 UPLOAD_RECIPES = "recipes/images/"
 CHARACTERS_SHORT_URL = "ABCDEFGHJKLMNOPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz1234567890"

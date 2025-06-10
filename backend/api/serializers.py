@@ -8,6 +8,12 @@ from drf_extra_fields.fields import Base64ImageField
 from rest_framework import serializers
 from django.contrib.auth import get_user_model
 
+# Constants for validation limits
+MIN_AMOUNT = 1
+MAX_AMOUNT = 32_000
+MIN_COOKING_TIME = 1
+MAX_COOKING_TIME = 32_000
+
 User = get_user_model()
 
 
@@ -19,7 +25,7 @@ class ProfileImageSerializer(serializers.ModelSerializer):
         fields = ("avatar",)
 
 
-class EnhancedUserSerializer(ProfileImageSerializer, UserSerializer):
+class EnhancedUserSerializer(ProfileImageSerializer, serializers.ModelSerializer):
     is_subscribed = serializers.SerializerMethodField()
 
     class Meta:
@@ -36,10 +42,13 @@ class EnhancedUserSerializer(ProfileImageSerializer, UserSerializer):
         read_only_fields = ("id", "is_subscribed")
 
     def get_is_subscribed(self, profile):
-        current_user = self.context.get("request").user
-        if current_user.is_anonymous:
+        try:
+            current_user = self.context["request"].user
+            if current_user.is_anonymous:
+                return False
+            return current_user.subscriptions.filter(author=profile).exists()
+        except KeyError:
             return False
-        return current_user.subscriptions.filter(author=profile).exists()
 
 
 class ComponentSerializer(serializers.ModelSerializer):
@@ -54,7 +63,14 @@ class RecipeComponentSerializer(serializers.ModelSerializer):
     measurement_unit = serializers.CharField(
         source="ingredient.measurement_unit", read_only=True
     )
-    amount = serializers.IntegerField(min_value=1)
+    amount = serializers.IntegerField(
+        min_value=MIN_AMOUNT,
+        max_value=MAX_AMOUNT,
+        error_messages={
+            "min_value": f"Amount must be at least {MIN_AMOUNT}.",
+            "max_value": f"Amount cannot exceed {MAX_AMOUNT}.",
+        },
+    )
 
     class Meta:
         model = ComponentRecipe
@@ -67,6 +83,14 @@ class DishSerializer(serializers.ModelSerializer):
     author = EnhancedUserSerializer(read_only=True)
     is_favorited = serializers.SerializerMethodField()
     is_in_shopping_cart = serializers.SerializerMethodField()
+    cooking_time = serializers.IntegerField(
+        min_value=MIN_COOKING_TIME,
+        max_value=MAX_COOKING_TIME,
+        error_messages={
+            "min_value": f"Cooking time must be at least {MIN_COOKING_TIME}.",
+            "max_value": f"Cooking time cannot exceed {MAX_COOKING_TIME}.",
+        },
+    )
 
     class Meta:
         model = Dish
@@ -109,10 +133,13 @@ class DishSerializer(serializers.ModelSerializer):
         return ingredients
 
     def _check_relation(self, dish, relation_type):
-        current_user = self.context.get("request").user
-        if current_user.is_anonymous:
+        try:
+            current_user = self.context["request"].user
+            if current_user.is_anonymous:
+                return False
+            return getattr(current_user, relation_type).filter(recipe=dish).exists()
+        except KeyError:
             return False
-        return getattr(current_user, relation_type).filter(recipe=dish).exists()
 
     def get_is_favorited(self, dish):
         return self._check_relation(dish, "favorites")
@@ -148,6 +175,7 @@ class DishSerializer(serializers.ModelSerializer):
         instance = super().update(instance, validated_data)
         self._store_ingredients(instance, ingredient_data)
         return instance
+
 
 class IngredientSerializer(serializers.ModelSerializer):
     class Meta:

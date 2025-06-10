@@ -1,6 +1,10 @@
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import viewsets
-from rest_framework.permissions import AllowAny, IsAuthenticated, IsAuthenticatedOrReadOnly
+from rest_framework.permissions import (
+    AllowAny,
+    IsAuthenticated,
+    IsAuthenticatedOrReadOnly,
+)
 from rest_framework.decorators import action
 from rest_framework.response import Response
 from rest_framework.views import APIView
@@ -43,6 +47,7 @@ class ComponentViewSet(viewsets.ReadOnlyModelViewSet):
         if name:
             return self.queryset.filter(name__startswith=name)
         return self.queryset
+
 
 class DishViewSet(viewsets.ModelViewSet):
     queryset = Dish.objects.all()
@@ -123,7 +128,7 @@ class ProfileViewSet(UserViewSet):
     @action(
         methods=("PUT",),
         detail=False,
-        permission_classes=(IsAuthenticated,),
+        permission_classes=(permissions.IsAuthenticated,),
         url_path="me/avatar",
     )
     def update_image(self, request):
@@ -145,7 +150,7 @@ class ProfileViewSet(UserViewSet):
     @action(
         methods=("GET",),
         detail=False,
-        permission_classes=(IsAuthenticatedOrReadOnly,),
+        permission_classes=(permissions.IsAuthenticatedOrReadOnly,),
         url_path="subscriptions",
     )
     def get_follows(self, request):
@@ -157,7 +162,7 @@ class ProfileViewSet(UserViewSet):
     @action(
         methods=("POST",),
         detail=True,
-        permission_classes=(IsAuthenticated,),
+        permission_classes=(permissions.IsAuthenticated,),
         url_path="subscribe",
     )
     def follow(self, request, id):
@@ -172,11 +177,13 @@ class ProfileViewSet(UserViewSet):
 
     @follow.mapping.delete
     def unfollow(self, request, id):
-        deleted, _ = SubscriptionPlan.objects.filter(
-            author=self.get_object(), user=request.user
-        ).delete()
+        author = self.get_object()
+        deleted, _ = request.user.subscriptions.filter(author=author).delete()
         if not deleted:
-            return Response(status=status.HTTP_400_BAD_REQUEST)
+            return Response(
+                {"detail": "Вы не подписаны на этого пользователя"},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
         return Response(status=status.HTTP_204_NO_CONTENT)
 
 
