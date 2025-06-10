@@ -48,7 +48,7 @@ INSTALLED_APPS = [
     "django_filters",
     "ingredients.apps.IngredientConfig",
     "users.apps.UsersConfig",
-    "recipes.apps.RecipesConfig",
+    "recipes.apps.RecipesConfig"
 ]
 
 MIDDLEWARE = [
@@ -122,13 +122,17 @@ REST_FRAMEWORK = {
 # Djoser
 DJOSER = {
     "LOGIN_FIELD": "email",
-    "USER_CREATE_PASSWORD_RETYPE": False,  # Как в шаблоне
+    "USER_CREATE_PASSWORD_RETYPE": False,
     "USERNAME_CHANGED_EMAIL_CONFIRMATION": False,
     "PASSWORD_CHANGED_EMAIL_CONFIRMATION": False,
     "SEND_ACTIVATION_EMAIL": False,
     "SERIALIZERS": {
         "user": "api.serializers.EnhancedUserSerializer",
         "current_user": "api.serializers.EnhancedUserSerializer",
+    },
+    "PERMISSIONS": {
+        "user_list": ["rest_framework.permissions.AllowAny"],
+        "user": ["rest_framework.permissions.AllowAny"],
     },
 }
 
